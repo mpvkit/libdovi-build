@@ -44,7 +44,7 @@ cargo install --path src/tools/x
 rustup +nightly target add
 
 rustup +nightly component add rust-src
-cargo +nightly build -Zbuild-std --target aarch64-apple-tvos
+cargo +nightly build -Z build-std=std,panic_abort --target aarch64-apple-tvos
 
 cargo  build -Z build-std --target aarch64-apple-tvos
 cargo  build -Z build-std --target aarch64-apple-tvos

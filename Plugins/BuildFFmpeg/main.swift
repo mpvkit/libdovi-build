@@ -10,7 +10,7 @@ do {
 private enum Library: String, CaseIterable {
     case gnutls, gmp, nettle, readline, libdovi
     var version: String {
-        return "2.1.0"
+        return "libdovi-3.2.0"
     }
 
     var url: String {
@@ -62,7 +62,27 @@ private class BuildDovi: BaseBuild {
         if Utility.shell("which cargo") == nil {
             throw NSError(domain: "Please manually install cargo: https://doc.rust-lang.org/cargo/getting-started/installation.html", code: 1)
         }
-        // Utility.shell("cargo install cargo-c")
+    }
+
+    override func buildALL() throws {
+        try super.buildALL()
+
+        // // 生成打包文件
+        let releaseURL = URL.currentDirectory + "../Release"
+        let workdirURL = releaseURL + "/libdovi"
+        try? FileManager.default.removeItem(at: releaseURL)
+        try? FileManager.default.createDirectory(at: workdirURL, withIntermediateDirectories: true)
+        try? FileManager.default.copyItem(at: URL.currentDirectory + "../Sources/Libdovi.xcframework", to: workdirURL + "/Libdovi.xcframework")
+        try? FileManager.default.copyItem(at: URL.currentDirectory + "/libdovi", to: workdirURL + "/lib")
+        try? FileManager.default.copyItem(at: URL.currentDirectory + "/libdovi/ios/thin/arm64/include", to: workdirURL + "/include")
+        Utility.shell("find . -name *.framework | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
+        Utility.shell("find . -name pkgconfig | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
+        Utility.shell("find . -name include | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
+        try? FileManager.default.removeItem(at: workdirURL + "/lib.log")
+
+        let version = Library.libdovi.version.replacingOccurrences(of: "libdovi-", with: "").trimmingCharacters(in: CharacterSet(charactersIn: "v"))
+        Utility.shell("pwd", currentDirectoryURL: releaseURL)
+        Utility.shell("pwd && tar -cf libdovi-\(version).tar libdovi", currentDirectoryURL: releaseURL)
     }
 
     override func build(platform: PlatformType, arch: ArchType) throws {
@@ -71,25 +91,28 @@ private class BuildDovi: BaseBuild {
         if !platform.isSupportDovi(arch: arch) {
             return
         }
-        print("#############")
-        print(arch)
+
         var target = platform.rustTarget(arch: arch)
-        
-        print(target)
         if target == "x86_64-apple-ios-sim" {
             target = "x86_64-apple-ios"
         }
         if target == "x86_64-apple-tvos-sim" {
             target = "x86_64-apple-tvos"
         }
-        // Utility.shell("rustup target add \(target)")
 
         let prefix = thinDir(platform: platform, arch: arch)
         let currentDirectoryURL = directoryURL + "dolby_vision"
         let environ = environment(platform: platform, arch: arch)
 
         let cargo = Utility.shell("which cargo", isOutput: true)!
-        try Utility.launch(path: cargo, arguments: ["+nightly", "cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
+        // if platform == .macos || platform == .ios || platform == .isimulator {
+        //     // 使用稳定版target
+        //     Utility.shell("rustup target add \(target)")
+        //     try Utility.launch(path: cargo, arguments: ["cinstall", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
+        // } else {
+            // 使用Tier3版target：https://doc.rust-lang.org/nightly/rustc/platform-support.html#tier-3
+            try Utility.launch(path: cargo, arguments: ["+nightly", "cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
+        // }
     }
 }
 
@@ -448,7 +471,8 @@ private enum PlatformType: String, CaseIterable {
         case .macos:
             return "10.15"
         case .maccatalyst:
-            return "14.0"
+            // return "14.0"
+            return ""
         }
     }
 
@@ -476,7 +500,9 @@ private enum PlatformType: String, CaseIterable {
         case .macos:
             return "macos-arm64_x86_64"
         case .tvos:
-            return "tvos-arm64_arm64e"
+            // arm64e 还没ABI。所以第三方库是无法使用的
+            // return "tvos-arm64_arm64e"
+            return "tvos-arm64"
         case .tvsimulator:
             return "tvos-arm64_x86_64-simulator"
         }
@@ -488,7 +514,9 @@ private enum PlatformType: String, CaseIterable {
         case .ios:
             return [.arm64]
         case .tvos:
-            return [.arm64, .arm64e]
+            // arm64e 还没ABI。所以第三方库是无法使用的
+            // return [.arm64, .arm64e]
+            return [.arm64]
         case .isimulator, .tvsimulator:
             return [.arm64, .x86_64]
         case .macos:
@@ -565,7 +593,8 @@ private enum PlatformType: String, CaseIterable {
         case .tvsimulator:
             return "-mtvos-simulator-version-min=\(minVersion)"
         case .maccatalyst:
-            return "-miphoneos-version-min=\(minVersion)"
+            // return "-miphoneos-version-min=\(minVersion)"
+            return ""
         }
     }
 

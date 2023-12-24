@@ -1,6 +1,9 @@
 .DS_Store
 /.build
 /Packages
+/Release
 xcuserdata
 .swiftpm
 Script
+*.log
+*.tar

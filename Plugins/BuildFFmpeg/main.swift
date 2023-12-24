@@ -515,6 +515,7 @@ private enum PlatformType: String, CaseIterable {
             return [.arm64]
         case .tvos:
             // arm64e 还没ABI。所以第三方库是无法使用的
+            // rust暂时没有arm64e的target：https://github.com/rust-lang/rust/issues/73628
             // return [.arm64, .arm64e]
             return [.arm64]
         case .isimulator, .tvsimulator:
@@ -555,6 +556,7 @@ private enum PlatformType: String, CaseIterable {
         case .isimulator:
             return true
         case .tvos:
+            // rust暂时没有arm64e的target：https://github.com/rust-lang/rust/issues/73628
             return arch != .arm64e
         case .tvsimulator:
             return true

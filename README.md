@@ -7,9 +7,20 @@
 
 ```
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-# switch to nightly build
-rustup default nightly
-rustup override set nightly
+```
+
+### build rustc support tvOS arm64e target
+
+```
+git clone https://github.com/cxfksword/rust.git -b tvos-arm64e
+cd rust
+./x check
+./x build
+
+# use local build rustc. https://rustc-dev-guide.rust-lang.org/building/how-to-build-and-run.html#creating-a-rustup-toolchain
+rustup toolchain link stage0 build/host/stage0-sysroot
+rustup toolchain link stage1 build/host/stage1
+rustc +stage1 -vV
 ```
 
 
@@ -18,35 +29,12 @@ rustup override set nightly
 ```
 git clone --depth=1 https://github.com/lu-zero/cargo-c.git
 cd cargo-c
-# 修改 ./src/build.rs,./src/install.rs 支持 tvos 平台
 cargo install --path .
 ```
-
 
 ### build
 
 ```
 swift run build
-
-```
-
-
-```
-git clone --recursive --depth=1 https://github.com/rust-lang/rust.git
-cd rust
-cp config.example.toml config.toml
-sed -i "s/#target =.*/target = [\"aarch64-apple-darwin\", \"x86_64-apple-darwin\", \"x86_64-apple-ios-macabi\", \"aarch64-apple-ios-macabi\", \"aarch64-apple-ios\", \"x86_64-apple-ios\", \"aarch64-apple-ios-sim\", \"aarch64-apple-tvos\", \"x86_64-apple-tvos\", \"aarch64-apple-tvos-sim\", \"x86_64-apple-tvos-sim\"]/" ./config.toml
-sed -i "s/cc =.*/cc = \"1.0.83\"/" ./src/bootstrap/Cargo.toml
-cargo install --path src/tools/x
-./x.py build
-
-
-rustup +nightly target add
-
-rustup +nightly component add rust-src
-cargo +nightly build -Z build-std=std,panic_abort --target aarch64-apple-tvos
-
-cargo  build -Z build-std --target aarch64-apple-tvos
-cargo  build -Z build-std --target aarch64-apple-tvos
 
 ```

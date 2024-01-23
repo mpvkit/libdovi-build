@@ -86,12 +86,6 @@ private class BuildDovi: BaseBuild {
     }
 
     override func build(platform: PlatformType, arch: ArchType) throws {
-        // build rust lang codebase
-        // 缺少rust目标镜像，导致没法编译
-        if !platform.isSupportDovi(arch: arch) {
-            return
-        }
-
         var target = platform.rustTarget(arch: arch)
         if target == "x86_64-apple-ios-sim" {
             target = "x86_64-apple-ios"
@@ -105,14 +99,7 @@ private class BuildDovi: BaseBuild {
         let environ = environment(platform: platform, arch: arch)
 
         let cargo = Utility.shell("which cargo", isOutput: true)!
-        // if platform == .macos || platform == .ios || platform == .isimulator {
-        //     // 使用稳定版target
-        //     Utility.shell("rustup target add \(target)")
-        //     try Utility.launch(path: cargo, arguments: ["cinstall", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
-        // } else {
-            // 使用Tier3版target：https://doc.rust-lang.org/nightly/rustc/platform-support.html#tier-3
-            try Utility.launch(path: cargo, arguments: ["+nightly", "cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
-        // }
+        try Utility.launch(path: cargo, arguments: ["+stage1", "cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
     }
 }
 
@@ -500,9 +487,8 @@ private enum PlatformType: String, CaseIterable {
         case .macos:
             return "macos-arm64_x86_64"
         case .tvos:
-            // arm64e 还没ABI。所以第三方库是无法使用的
-            // return "tvos-arm64_arm64e"
-            return "tvos-arm64"
+            // 保持和xcode一致：https://github.com/KhronosGroup/MoltenVK/issues/431#issuecomment-771137085
+            return "tvos-arm64_arm64e"
         case .tvsimulator:
             return "tvos-arm64_x86_64-simulator"
         }
@@ -514,10 +500,8 @@ private enum PlatformType: String, CaseIterable {
         case .ios:
             return [.arm64]
         case .tvos:
-            // arm64e 还没ABI。所以第三方库是无法使用的
-            // rust暂时没有arm64e的target：https://github.com/rust-lang/rust/issues/73628
-            // return [.arm64, .arm64e]
-            return [.arm64]
+            // 保持和xcode一致：https://github.com/KhronosGroup/MoltenVK/issues/431#issuecomment-771137085
+            return [.arm64, .arm64e]
         case .isimulator, .tvsimulator:
             return [.arm64, .x86_64]
         case .macos:
@@ -549,24 +533,6 @@ private enum PlatformType: String, CaseIterable {
         }
     }
 
-    func isSupportDovi(arch: ArchType) -> Bool {
-        switch self {
-        case .ios:
-            return true
-        case .isimulator:
-            return true
-        case .tvos:
-            // rust暂时没有arm64e的target：https://github.com/rust-lang/rust/issues/73628
-            return arch != .arm64e
-        case .tvsimulator:
-            return true
-        case .macos:
-            return true
-        case .maccatalyst:
-            return true
-        }
-    }
-
     func rustTarget(arch: ArchType) -> String {
         switch self {
         case .ios:
@@ -574,7 +540,7 @@ private enum PlatformType: String, CaseIterable {
         case .isimulator:
             return "\(arch.cpuFamily)-apple-ios-sim"
         case .tvos:
-            return "\(arch.cpuFamily)-apple-tvos"
+            return "\(arch == .arm64e ? "arm64e" : "\(arch.cpuFamily)")-apple-tvos"
         case .tvsimulator:
             return "\(arch.cpuFamily)-apple-tvos-sim"
         case .macos:

@@ -76,6 +76,7 @@ private class BuildDovi: BaseBuild {
         try? FileManager.default.copyItem(at: URL.currentDirectory + "/libdovi", to: workdirURL + "/lib")
         try? FileManager.default.copyItem(at: URL.currentDirectory + "/libdovi/ios/thin/arm64/include", to: workdirURL + "/include")
         Utility.shell("find . -name *.framework | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
+        Utility.shell("find . -name *.dylib | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
         Utility.shell("find . -name pkgconfig | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
         Utility.shell("find . -name include | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
         try? FileManager.default.removeItem(at: workdirURL + "/lib.log")

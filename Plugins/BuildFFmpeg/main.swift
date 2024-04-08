@@ -10,7 +10,7 @@ do {
 private enum Library: String, CaseIterable {
     case gnutls, gmp, nettle, readline, libdovi
     var version: String {
-        return "libdovi-3.2.0"
+        return "libdovi-3.3.0"
     }
 
     var url: String {
@@ -72,18 +72,21 @@ private class BuildDovi: BaseBuild {
         let workdirURL = releaseURL + "/libdovi"
         try? FileManager.default.removeItem(at: releaseURL)
         try? FileManager.default.createDirectory(at: workdirURL, withIntermediateDirectories: true)
-        try? FileManager.default.copyItem(at: URL.currentDirectory + "../Sources/Libdovi.xcframework", to: workdirURL + "/Libdovi.xcframework")
+        try? FileManager.default.copyItem(at: URL.currentDirectory + "../Sources/Libdovi.xcframework", to: releaseURL + "/Libdovi.xcframework")
         try? FileManager.default.copyItem(at: URL.currentDirectory + "/libdovi", to: workdirURL + "/lib")
         try? FileManager.default.copyItem(at: URL.currentDirectory + "/libdovi/ios/thin/arm64/include", to: workdirURL + "/include")
         Utility.shell("find . -name *.framework | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
         Utility.shell("find . -name *.dylib | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
         Utility.shell("find . -name pkgconfig | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
         Utility.shell("find . -name include | xargs rm -rf", currentDirectoryURL: workdirURL + "/lib")
-        try? FileManager.default.removeItem(at: workdirURL + "/lib.log")
+        Utility.shell("find . -name *.log | xargs rm -rf", currentDirectoryURL: releaseURL)
+        Utility.shell("find . -name *.DS_Store | xargs rm -rf", currentDirectoryURL: releaseURL)
 
         let version = Library.libdovi.version.replacingOccurrences(of: "libdovi-", with: "").trimmingCharacters(in: CharacterSet(charactersIn: "v"))
-        Utility.shell("pwd", currentDirectoryURL: releaseURL)
-        Utility.shell("pwd && tar -cf libdovi-\(version).tar libdovi", currentDirectoryURL: releaseURL)
+        Utility.shell("zip -qr Libdovi.xcframework.zip Libdovi.xcframework", currentDirectoryURL: releaseURL)
+        Utility.shell("swift package compute-checksum Libdovi.xcframework.zip > checksum.txt", currentDirectoryURL: releaseURL)
+        Utility.shell("tar -cf libdovi-\(version).tar libdovi", currentDirectoryURL: releaseURL)
+        
     }
 
     override func build(platform: PlatformType, arch: ArchType) throws {

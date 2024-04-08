@@ -27,9 +27,7 @@ rustc +stage1 -vV
 ### install cargo-c
 
 ```
-git clone --depth=1 https://github.com/lu-zero/cargo-c.git
-cd cargo-c
-cargo install --path .
+cargo install cargo-c
 ```
 
 ### build

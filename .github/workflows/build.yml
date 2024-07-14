@@ -27,11 +27,11 @@ jobs:
         cd rust
         git apply ../patch/01-tvos_arm64e_support.patch
         ./x check
-        ./x build
+        ./x build --stage 2
 
         rustup toolchain link stage0 build/host/stage0-sysroot
         rustup toolchain link stage1 build/host/stage1
-        rustc +stage1 -vV
+        rustc +stage2 -vV
 
         cargo install cargo-c
 

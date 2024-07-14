@@ -72,7 +72,7 @@ private class BuildDovi: BaseBuild {
         let environ = environment(platform: platform, arch: arch)
 
         let cargo = Utility.shell("which cargo", isOutput: true, environment: environ)!
-        try Utility.launch(path: cargo, arguments: ["+stage1", "cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
+        try Utility.launch(path: cargo, arguments: ["+stage2", "cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
     }
 }
 
@@ -88,9 +88,9 @@ extension PlatformType {
         case .tvsimulator:
             return "\(arch.cpuFamily)-apple-tvos-sim"
         case .xros:
-            return "\(arch.cpuFamily)-apple-xros"
+            return "\(arch.cpuFamily)-apple-visionos"
         case .xrsimulator:
-            return "\(arch.cpuFamily)-apple-xros-sim"
+            return "\(arch.cpuFamily)-apple-visionos-sim"
         case .macos:
             return "\(arch.cpuFamily)-apple-darwin"
         case .maccatalyst:

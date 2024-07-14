@@ -1,0 +1,53 @@
+From b18bf33dc494bc0e9feb90ad3af93411020be98d Mon Sep 17 00:00:00 2001
+From: cxfksword <718792+cxfksword@users.noreply.github.com>
+Date: Sun, 14 Jul 2024 15:49:13 +0800
+Subject: [PATCH] Add visionOS support
+
+---
+ src/build_targets.rs | 2 +-
+ src/install.rs       | 2 +-
+ src/target.rs        | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/build_targets.rs b/src/build_targets.rs
+index eb10d8d..a2b0d6c 100644
+--- a/src/build_targets.rs
++++ b/src/build_targets.rs
+@@ -96,7 +96,7 @@ impl BuildTargets {
+                 let shared_lib = targetdir.join(format!("lib{lib_name}.so"));
+                 (shared_lib, static_lib, None, None, None)
+             }
+-            ("macos", _) | ("ios", _) | ("tvos", _) => {
++            ("macos", _) | ("ios", _) | ("tvos", _) | ("visionos", _) => {
+                 let static_lib = targetdir.join(format!("lib{lib_name}.a"));
+                 let shared_lib = targetdir.join(format!("lib{lib_name}.dylib"));
+                 (shared_lib, static_lib, None, None, None)
+diff --git a/src/install.rs b/src/install.rs
+index 92eb8cb..eee4db7 100644
+--- a/src/install.rs
++++ b/src/install.rs
+@@ -92,7 +92,7 @@ impl LibType {
+             | ("haiku", _)
+             | ("illumos", _)
+             | ("emscripten", _) => LibType::So,
+-            ("macos", _) | ("ios", _) | ("tvos", _) => LibType::Dylib,
++            ("macos", _) | ("ios", _) | ("tvos", _) | ("visionos", _) => LibType::Dylib,
+             ("windows", _) => LibType::Windows,
+             _ => unimplemented!("The target {}-{} is not supported yet", os, env),
+         }
+diff --git a/src/target.rs b/src/target.rs
+index 0b28bd3..3a070a0 100644
+--- a/src/target.rs
++++ b/src/target.rs
+@@ -93,7 +93,7 @@ impl Target {
+             } else {
+                 format!("-Wl,-soname,lib{lib_name}.so")
+             });
+-        } else if os == "macos" || os == "ios" || os == "tvos" {
++        } else if os == "macos" || os == "ios" || os == "tvos" || os == "visionos" {
+             let line = if capi_config.library.versioning {
+                 format!("-Wl,-install_name,{1}/lib{0}.{5}.dylib,-current_version,{2}.{3}.{4},-compatibility_version,{5}",
+                         lib_name, libdir.display(), major, minor, patch, sover)
+-- 
+2.37.5
+

@@ -25,15 +25,20 @@ jobs:
       run: |
         git clone https://github.com/rust-lang/rust.git -b ${{ github.event.inputs.version }}
         cd rust
-        git apply ../patch/01-tvos_arm64e_support.patch
+        git apply ../patch/rust/01-tvos_arm64e_support.patch
         ./x check
         ./x build --stage 2
 
         rustup toolchain link stage0 build/host/stage0-sysroot
         rustup toolchain link stage1 build/host/stage1
+        rustup toolchain link stage2 build/host/stage2
         rustc +stage2 -vV
+        cd ..
 
-        cargo install cargo-c
+        git clone https://github.com/lu-zero/cargo-c.git
+        cd cargo-c
+        git apply ../patch/cargo-c/01-add-visionos-support.patch
+        cargo install --path .
 
     - name: Build
       run: |

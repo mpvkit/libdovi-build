@@ -1,7 +1,7 @@
 From 081302a65b479f31c829a2da473c999c8392f47d Mon Sep 17 00:00:00 2001
 From: cxfksword <718792+cxfksword@users.noreply.github.com>
 Date: Sun, 14 Jul 2024 17:58:00 +0800
-Subject: [PATCH] add tvOS arm64e target
+Subject: [PATCH 1/2] add tvOS arm64e target
 
 ---
  .../rustc_target/src/spec/base/apple/mod.rs   | 20 +++++++++-----
@@ -109,6 +109,32 @@ index 00000000000..fce1ecfcaa7
 +    }
 +}
 \ No newline at end of file
+-- 
+2.37.5
+
+
+From b7e3de75f56d251facea850a178576c6b82bee71 Mon Sep 17 00:00:00 2001
+From: cxfksword <718792+cxfksword@users.noreply.github.com>
+Date: Sun, 14 Jul 2024 18:12:21 +0800
+Subject: [PATCH 2/2] add tvOS arm64e target
+
+---
+ compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
+index fce1ecfcaa7..b9675a74ca7 100644
+--- a/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
++++ b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
+@@ -3,7 +3,7 @@
+ 
+ pub fn target() -> Target {
+     let arch = Arch::Arm64e;
+-    let mut base = opts("tvos", arch);
++    let mut base = opts("tvos", arch, TargetAbi::Normal);
+     base.supported_sanitizers = SanitizerSet::ADDRESS | SanitizerSet::THREAD;
+ 
+     Target {
 -- 
 2.37.5
 

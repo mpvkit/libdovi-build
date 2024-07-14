@@ -6,7 +6,7 @@ on:
       version:
         description: 'Version to release'
         required: true
-        default: '1.79.0'
+        default: '3.3.0'
 
 jobs:
   build:
@@ -21,20 +21,20 @@ jobs:
         sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
         xcodebuild -showsdks
   
-    # - name: Cache Primes
-    #   id: cache-primes
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: |
-    #       ~/.cargo/bin/
-    #       ~/.cargo/registry/index/
-    #       ~/.cargo/registry/cache/
-    #       ~/.cargo/git/db/
-    #       target/
-    #     key: ${{ runner.os }}-${{ github.event.inputs.version }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Cache Primes
+      id: cache-primes
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-${{ github.event.inputs.version }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Build Rust
-      # if: steps.cache-primes.outputs.cache-hit != 'true'
+      if: steps.cache-primes.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/rust-lang/rust.git -b beta
         cd rust
@@ -49,7 +49,7 @@ jobs:
         which rustc
 
     - name: Build cargo-c
-      # if: steps.cache-primes.outputs.cache-hit != 'true'
+      if: steps.cache-primes.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/lu-zero/cargo-c.git
         cd cargo-c

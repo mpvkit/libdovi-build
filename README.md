@@ -1,6 +1,14 @@
 # libdovi-build
 
 
+## Installation
+
+### Swift Package Manager
+
+```
+https://github.com/mpvkit/libdovi-build.git
+```
+
 ## how to build
 
 ### install rust
@@ -12,27 +20,36 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ### build rustc support tvOS arm64e target
 
 ```
-git clone https://github.com/cxfksword/rust.git -b tvos-arm64e
+git clone https://github.com/rust-lang/rust.git -b ${{ github.event.inputs.version }}
 cd rust
+git apply ../patch/rust/01-tvos_arm64e_support.patch
 ./x check
-./x build
+./x build --stage 2
 
-# use local build rustc. https://rustc-dev-guide.rust-lang.org/building/how-to-build-and-run.html#creating-a-rustup-toolchain
 rustup toolchain link stage0 build/host/stage0-sysroot
 rustup toolchain link stage1 build/host/stage1
-rustc +stage1 -vV
+rustup toolchain link stage2 build/host/stage2
+rustc +stage2 -vV
 ```
 
 
 ### install cargo-c
 
 ```
-cargo install cargo-c
+git clone https://github.com/lu-zero/cargo-c.git
+cd cargo-c
+git apply ../patch/cargo-c/01-add-visionos-support.patch
+cargo install --path .
+
+#cargo install cargo-c
 ```
 
-### build
+### build libdovi
 
-```
-swift run build
-
+```bash
+make build
+# or build specified platforms 
+make build platform=ios,macos
+# or see help
+make help
 ```

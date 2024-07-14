@@ -1,7 +1,7 @@
-From 081302a65b479f31c829a2da473c999c8392f47d Mon Sep 17 00:00:00 2001
+From 7a365bc05bc8651230c580c8ef638d5ab07033ff Mon Sep 17 00:00:00 2001
 From: cxfksword <718792+cxfksword@users.noreply.github.com>
-Date: Sun, 14 Jul 2024 17:58:00 +0800
-Subject: [PATCH 1/2] add tvOS arm64e target
+Date: Sun, 14 Jul 2024 18:23:18 +0800
+Subject: [PATCH] add tvos arm64e target
 
 ---
  .../rustc_target/src/spec/base/apple/mod.rs   | 20 +++++++++-----
@@ -77,16 +77,16 @@ index fe07d116726..fe1e3091ec0 100644
      ("arm64_32-apple-watchos", arm64_32_apple_watchos),
 diff --git a/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
 new file mode 100644
-index 00000000000..fce1ecfcaa7
+index 00000000000..087bc8bfde1
 --- /dev/null
 +++ b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
 @@ -0,0 +1,27 @@
-+use crate::spec::base::apple::{tvos_llvm_target, opts, Arch};
++use crate::spec::base::apple::{tvos_llvm_target, opts, Arch, TargetAbi};
 +use crate::spec::{FramePointer, SanitizerSet, Target, TargetOptions};
 +
 +pub fn target() -> Target {
 +    let arch = Arch::Arm64e;
-+    let mut base = opts("tvos", arch);
++    let mut base = opts("tvos", arch, TargetAbi::Normal);
 +    base.supported_sanitizers = SanitizerSet::ADDRESS | SanitizerSet::THREAD;
 +
 +    Target {
@@ -109,32 +109,6 @@ index 00000000000..fce1ecfcaa7
 +    }
 +}
 \ No newline at end of file
--- 
-2.37.5
-
-
-From b7e3de75f56d251facea850a178576c6b82bee71 Mon Sep 17 00:00:00 2001
-From: cxfksword <718792+cxfksword@users.noreply.github.com>
-Date: Sun, 14 Jul 2024 18:12:21 +0800
-Subject: [PATCH 2/2] add tvOS arm64e target
-
----
- compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
-index fce1ecfcaa7..b9675a74ca7 100644
---- a/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
-+++ b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
-@@ -3,7 +3,7 @@
- 
- pub fn target() -> Target {
-     let arch = Arch::Arm64e;
--    let mut base = opts("tvos", arch);
-+    let mut base = opts("tvos", arch, TargetAbi::Normal);
-     base.supported_sanitizers = SanitizerSet::ADDRESS | SanitizerSet::THREAD;
- 
-     Target {
 -- 
 2.37.5
 

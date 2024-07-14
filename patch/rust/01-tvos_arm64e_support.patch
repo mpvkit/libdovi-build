@@ -1,29 +1,29 @@
-From a672d64e9546ef293027f59d91b4129302638fed Mon Sep 17 00:00:00 2001
+From 081302a65b479f31c829a2da473c999c8392f47d Mon Sep 17 00:00:00 2001
 From: cxfksword <718792+cxfksword@users.noreply.github.com>
-Date: Sun, 14 Jul 2024 14:47:03 +0800
-Subject: [PATCH] Add arm64e-apple-tvos targets
+Date: Sun, 14 Jul 2024 17:58:00 +0800
+Subject: [PATCH] add tvOS arm64e target
 
 ---
- .../rustc_target/src/spec/base/apple/mod.rs   | 19 ++++++++-----
+ .../rustc_target/src/spec/base/apple/mod.rs   | 20 +++++++++-----
  compiler/rustc_target/src/spec/mod.rs         |  1 +
  .../src/spec/targets/arm64e_apple_tvos.rs     | 27 +++++++++++++++++++
- 3 files changed, 41 insertions(+), 6 deletions(-)
+ 3 files changed, 41 insertions(+), 7 deletions(-)
  create mode 100644 compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
 
 diff --git a/compiler/rustc_target/src/spec/base/apple/mod.rs b/compiler/rustc_target/src/spec/base/apple/mod.rs
-index d667bad44e3..6d834959d62 100644
+index 05542009083..c78079a6d7d 100644
 --- a/compiler/rustc_target/src/spec/base/apple/mod.rs
 +++ b/compiler/rustc_target/src/spec/base/apple/mod.rs
-@@ -100,7 +100,7 @@ fn pre_link_args(os: &'static str, arch: Arch, abi: &'static str) -> LinkArgs {
+@@ -104,7 +104,7 @@ fn pre_link_args(os: &'static str, arch: Arch, abi: TargetAbi) -> LinkArgs {
      let min_version: StaticCow<str> = {
          let (major, minor) = match os {
-             "ios" => ios_deployment_target(arch, abi),
+             "ios" => ios_deployment_target(arch, abi.target_abi()),
 -            "tvos" => tvos_deployment_target(),
 +            "tvos" => tvos_deployment_target(arch),
              "watchos" => watchos_deployment_target(),
              "visionos" => visionos_deployment_target(),
              "macos" => macos_deployment_target(arch),
-@@ -245,7 +245,13 @@ pub fn deployment_target(target: &Target) -> Option<(u32, u32)> {
+@@ -247,7 +247,13 @@ pub fn deployment_target(target: &Target) -> Option<(u32, u32)> {
              ios_deployment_target(arch, &target.abi)
          }
          "watchos" => watchos_deployment_target(),
@@ -38,13 +38,14 @@ index d667bad44e3..6d834959d62 100644
          "visionos" => visionos_deployment_target(),
          _ => return None,
      };
-@@ -349,18 +355,19 @@ pub fn ios_sim_llvm_target(arch: Arch) -> String {
+@@ -352,19 +358,19 @@ pub fn ios_sim_llvm_target(arch: Arch) -> String {
      format!("{}-apple-ios{}.{}.0-simulator", arch.target_name(), major, minor)
  }
  
 -fn tvos_deployment_target() -> (u32, u32) {
 +fn tvos_deployment_target(arch: Arch) -> (u32, u32) {
      // If you are looking for the default deployment target, prefer `rustc --print deployment-target`.
+-    // Note: If bumping this version, remember to update it in the rustc platform-support docs.
 -    from_set_deployment_target("TVOS_DEPLOYMENT_TARGET").unwrap_or((10, 0))
 +    let (major, minor) = if arch == Arm64e { (14, 0) } else { (10, 0) };
 +    from_set_deployment_target("TVOS_DEPLOYMENT_TARGET").unwrap_or((major, minor))
@@ -63,10 +64,10 @@ index d667bad44e3..6d834959d62 100644
  }
  
 diff --git a/compiler/rustc_target/src/spec/mod.rs b/compiler/rustc_target/src/spec/mod.rs
-index 291a761913b..20daa0a4ba5 100644
+index fe07d116726..fe1e3091ec0 100644
 --- a/compiler/rustc_target/src/spec/mod.rs
 +++ b/compiler/rustc_target/src/spec/mod.rs
-@@ -1624,6 +1624,7 @@ fn $module() {
+@@ -1660,6 +1660,7 @@ fn $module() {
      ("aarch64-apple-tvos", aarch64_apple_tvos),
      ("aarch64-apple-tvos-sim", aarch64_apple_tvos_sim),
      ("x86_64-apple-tvos", x86_64_apple_tvos),

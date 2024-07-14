@@ -36,7 +36,7 @@ jobs:
     - name: Build Rust
       # if: steps.cache-primes.outputs.cache-hit != 'true'
       run: |
-        git clone https://github.com/rust-lang/rust.git
+        git clone https://github.com/rust-lang/rust.git -b beta
         cd rust
         git apply ../patch/rust/01-tvos_arm64e_support.patch
         ./x check

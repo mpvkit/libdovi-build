@@ -773,7 +773,7 @@ class PackageTarget {
 
 
 enum PlatformType: String, CaseIterable {
-    case tvos, xros, xrsimulator, maccatalyst, macos, isimulator, tvsimulator, tvos, ios
+    case xros, xrsimulator, maccatalyst, macos, isimulator, tvsimulator, tvos, ios
     var minVersion: String {
         switch self {
         case .ios, .isimulator:

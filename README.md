@@ -1,5 +1,6 @@
 # libdovi-build
 
+build scripts for [libdovi](https://github.com/quietvoid/dovi_tool)
 
 ## Installation
 

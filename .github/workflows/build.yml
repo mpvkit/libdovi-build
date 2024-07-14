@@ -21,17 +21,22 @@ jobs:
         sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
         xcodebuild -showsdks
   
-    - name: Cache Primes
-      id: cache-primes
-      uses: actions/cache@v4
-      with:
-        path: /Users/runner/.cargo/bin
-        key: ${{ runner.os }}-${{ github.event.inputs.version }}-rust-primes
+    # - name: Cache Primes
+    #   id: cache-primes
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: |
+    #       ~/.cargo/bin/
+    #       ~/.cargo/registry/index/
+    #       ~/.cargo/registry/cache/
+    #       ~/.cargo/git/db/
+    #       target/
+    #     key: ${{ runner.os }}-${{ github.event.inputs.version }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Build Rust
-      if: steps.cache-primes.outputs.cache-hit != 'true'
+      # if: steps.cache-primes.outputs.cache-hit != 'true'
       run: |
-        git clone https://github.com/rust-lang/rust.git -b ${{ github.event.inputs.version }}
+        git clone https://github.com/rust-lang/rust.git
         cd rust
         git apply ../patch/rust/01-tvos_arm64e_support.patch
         ./x check
@@ -44,7 +49,7 @@ jobs:
         which rustc
 
     - name: Build cargo-c
-      if: steps.cache-primes.outputs.cache-hit != 'true'
+      # if: steps.cache-primes.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/lu-zero/cargo-c.git
         cd cargo-c
@@ -53,6 +58,10 @@ jobs:
 
     - name: Build
       run: |
+        rustc +stage2 -vV
+        which rustc
+        rustc +stage2 --print target-list|grep vision
+        rustc +stage2 --print target-list|grep tvos
         make build version=${{ github.event.inputs.version }}
 
     - name: Push Package.swift

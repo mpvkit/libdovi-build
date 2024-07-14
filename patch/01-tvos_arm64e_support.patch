@@ -1,0 +1,113 @@
+From a672d64e9546ef293027f59d91b4129302638fed Mon Sep 17 00:00:00 2001
+From: cxfksword <718792+cxfksword@users.noreply.github.com>
+Date: Sun, 14 Jul 2024 14:47:03 +0800
+Subject: [PATCH] Add arm64e-apple-tvos targets
+
+---
+ .../rustc_target/src/spec/base/apple/mod.rs   | 19 ++++++++-----
+ compiler/rustc_target/src/spec/mod.rs         |  1 +
+ .../src/spec/targets/arm64e_apple_tvos.rs     | 27 +++++++++++++++++++
+ 3 files changed, 41 insertions(+), 6 deletions(-)
+ create mode 100644 compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
+
+diff --git a/compiler/rustc_target/src/spec/base/apple/mod.rs b/compiler/rustc_target/src/spec/base/apple/mod.rs
+index d667bad44e3..6d834959d62 100644
+--- a/compiler/rustc_target/src/spec/base/apple/mod.rs
++++ b/compiler/rustc_target/src/spec/base/apple/mod.rs
+@@ -100,7 +100,7 @@ fn pre_link_args(os: &'static str, arch: Arch, abi: &'static str) -> LinkArgs {
+     let min_version: StaticCow<str> = {
+         let (major, minor) = match os {
+             "ios" => ios_deployment_target(arch, abi),
+-            "tvos" => tvos_deployment_target(),
++            "tvos" => tvos_deployment_target(arch),
+             "watchos" => watchos_deployment_target(),
+             "visionos" => visionos_deployment_target(),
+             "macos" => macos_deployment_target(arch),
+@@ -245,7 +245,13 @@ pub fn deployment_target(target: &Target) -> Option<(u32, u32)> {
+             ios_deployment_target(arch, &target.abi)
+         }
+         "watchos" => watchos_deployment_target(),
+-        "tvos" => tvos_deployment_target(),
++        "tvos" => {
++            let arch = match target.arch.as_ref() {
++                "arm64e" => Arm64e,
++                _ => Arm64,
++            };
++            tvos_deployment_target(arch)
++        },
+         "visionos" => visionos_deployment_target(),
+         _ => return None,
+     };
+@@ -349,18 +355,19 @@ pub fn ios_sim_llvm_target(arch: Arch) -> String {
+     format!("{}-apple-ios{}.{}.0-simulator", arch.target_name(), major, minor)
+ }
+ 
+-fn tvos_deployment_target() -> (u32, u32) {
++fn tvos_deployment_target(arch: Arch) -> (u32, u32) {
+     // If you are looking for the default deployment target, prefer `rustc --print deployment-target`.
+-    from_set_deployment_target("TVOS_DEPLOYMENT_TARGET").unwrap_or((10, 0))
++    let (major, minor) = if arch == Arm64e { (14, 0) } else { (10, 0) };
++    from_set_deployment_target("TVOS_DEPLOYMENT_TARGET").unwrap_or((major, minor))
+ }
+ 
+ pub fn tvos_llvm_target(arch: Arch) -> String {
+-    let (major, minor) = tvos_deployment_target();
++    let (major, minor) = tvos_deployment_target(arch);
+     format!("{}-apple-tvos{}.{}.0", arch.target_name(), major, minor)
+ }
+ 
+ pub fn tvos_sim_llvm_target(arch: Arch) -> String {
+-    let (major, minor) = tvos_deployment_target();
++    let (major, minor) = tvos_deployment_target(arch);
+     format!("{}-apple-tvos{}.{}.0-simulator", arch.target_name(), major, minor)
+ }
+ 
+diff --git a/compiler/rustc_target/src/spec/mod.rs b/compiler/rustc_target/src/spec/mod.rs
+index 291a761913b..20daa0a4ba5 100644
+--- a/compiler/rustc_target/src/spec/mod.rs
++++ b/compiler/rustc_target/src/spec/mod.rs
+@@ -1624,6 +1624,7 @@ fn $module() {
+     ("aarch64-apple-tvos", aarch64_apple_tvos),
+     ("aarch64-apple-tvos-sim", aarch64_apple_tvos_sim),
+     ("x86_64-apple-tvos", x86_64_apple_tvos),
++    ("arm64e-apple-tvos", arm64e_apple_tvos),
+ 
+     ("armv7k-apple-watchos", armv7k_apple_watchos),
+     ("arm64_32-apple-watchos", arm64_32_apple_watchos),
+diff --git a/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
+new file mode 100644
+index 00000000000..fce1ecfcaa7
+--- /dev/null
++++ b/compiler/rustc_target/src/spec/targets/arm64e_apple_tvos.rs
+@@ -0,0 +1,27 @@
++use crate::spec::base::apple::{tvos_llvm_target, opts, Arch};
++use crate::spec::{FramePointer, SanitizerSet, Target, TargetOptions};
++
++pub fn target() -> Target {
++    let arch = Arch::Arm64e;
++    let mut base = opts("tvos", arch);
++    base.supported_sanitizers = SanitizerSet::ADDRESS | SanitizerSet::THREAD;
++
++    Target {
++        llvm_target: tvos_llvm_target(arch).into(),
++        metadata: crate::spec::TargetMetadata {
++            description: None,
++            tier: None,
++            host_tools: None,
++            std: None,
++        },
++        pointer_width: 64,
++        data_layout: "e-m:o-i64:64-i128:128-n32:64-S128".into(),
++        arch: arch.target_arch(),
++        options: TargetOptions {
++            features: "+neon,+fp-armv8,+apple-a12,+v8.3a,+pauth".into(),
++            max_atomic_width: Some(128),
++            frame_pointer: FramePointer::NonLeaf,
++            ..base
++        },
++    }
++}
+\ No newline at end of file
+-- 
+2.37.5
+

@@ -37,12 +37,7 @@ rustc +stage2 -vV
 ### install cargo-c
 
 ```
-git clone https://github.com/lu-zero/cargo-c.git
-cd cargo-c
-git apply ../patch/cargo-c/01-add-visionos-support.patch
-cargo install --path .
-
-#cargo install cargo-c
+cargo install cargo-c
 ```
 
 ### build libdovi

@@ -57,7 +57,7 @@ jobs:
 
     - name: Build Rust
       run: |
-        git clone https://github.com/rust-lang/rust.git -b 1.79.0
+        git clone https://github.com/rust-lang/rust.git -b 1.80.0
         cd rust
         git apply ../patch/rust/01-tvos_arm64e_support.patch
         ./x check

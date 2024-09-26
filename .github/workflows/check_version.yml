@@ -2,6 +2,8 @@ name: Check new version
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *' # every month first day
 
 jobs:
   build:
@@ -12,22 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout libdovi
+      - name: Checkout latest code
         uses: actions/checkout@v4
         with:
           repository: "quietvoid/dovi_tool"
-          path: 'dovi_tool'
+          path: 'latest_code'
           fetch-depth: 0
 
       - name: Get latest verion
         id: version
         run: |
-          cd ./dovi_tool
+          cd ./latest_code
           latest_tag=$(git tag --sort=-v:refname | grep "libdovi" | head -n 1)
           echo "latest tag: $latest_tag"
           echo "LATEST_VERSION=$latest_tag" >> $GITHUB_ENV
-          cd ..
-          rm -rf ./dovi_tool
+          rm -rf ../latest_code
 
       - name: update to new version
         uses: jannekem/run-python-script-action@v1
@@ -36,8 +37,6 @@ jobs:
             import re
 
             def parse_version(ver):
-              if ver == '':
-                return 0
               return int(re.sub(r'[^0-9]+', r'', ver))
 
             file_path = './Sources/BuildScripts/XCFrameworkBuild/main.swift'
@@ -52,7 +51,7 @@ jobs:
               set_env('FOUND_NEW_VERSION', '1')
               with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(content)
-
+            
 
       - name: Create Pull Request
         if: env.FOUND_NEW_VERSION
@@ -61,5 +60,6 @@ jobs:
           add-paths: |
             ./Sources/BuildScripts/XCFrameworkBuild/main.swift
           title: "bump version to ${{ env.LATEST_VERSION }}"
-          body: "${{ env.LATEST_VERSION }}\n"
+          body: "https://github.com/quietvoid/dovi_tool/releases/tag/${{ env.LATEST_VERSION }}\n"
           commit-message: "chore: bump version to ${{ env.LATEST_VERSION }}"
+          

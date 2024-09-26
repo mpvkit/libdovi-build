@@ -20,8 +20,8 @@ let package = Package(
 
         .binaryTarget(
             name: "Libdovi",
-            url: "https://github.com/mpvkit/libdovi-build/releases/download/3.3.0/Libdovi.xcframework.zip",
-            checksum: "ca4382ea4e17103fbcc979d0ddee69a6eb8967c0ab235cb786ffa96da5f512ed"
+            url: "https://github.com/mpvkit/libdovi-build/releases/download/3.3.1/Libdovi.xcframework.zip",
+            checksum: "9148dc1a7fc33ac16a4ea2a472e53a51aaf2d6955b2bc975d9321c2f6a4eff8e"
         ),
         //AUTO_GENERATE_TARGETS_END//
     ]

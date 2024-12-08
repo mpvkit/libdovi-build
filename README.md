@@ -21,9 +21,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ### build rustc support tvOS arm64e target
 
 ```
-git clone https://github.com/rust-lang/rust.git -b ${{ github.event.inputs.version }}
+git clone https://github.com/rust-lang/rust.git -b 1.83.0
 cd rust
-git apply ../patch/rust/01-tvos_arm64e_support.patch
 ./x check
 ./x build --stage 2
 

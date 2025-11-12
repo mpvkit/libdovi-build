@@ -53,23 +53,18 @@ jobs:
           set_env('BUILD_VERSION', buildVersion)
           set_env('RELEASE_VERSION', releaseVersion)
 
+    - name: Build Rust
+      run: |
+        git clone https://github.com/rust-lang/rust.git -b 1.91.0
+        cd rust
+        ./x check
+        ./x build --stage 2
 
-    - name: Output rust version
-      run: rustup --version
-
-    # - name: Build Rust
-    #   run: |
-    #     git clone https://github.com/rust-lang/rust.git -b 1.80.0
-    #     cd rust
-    #     git apply ../patch/rust/01-tvos_arm64e_support.patch
-    #     ./x check
-    #     ./x build --stage 2
-
-    #     rustup toolchain link stage0 build/host/stage0-sysroot
-    #     rustup toolchain link stage1 build/host/stage1
-    #     rustup toolchain link stage2 build/host/stage2
-    #     rustc +stage2 -vV
-    #     which rustc
+        rustup toolchain link stage0 build/host/stage0-sysroot
+        rustup toolchain link stage1 build/host/stage1
+        rustup toolchain link stage2 build/host/stage2
+        rustc +stage2 -vV
+        which rustc
 
     - name: Install cargo-c
       run: |

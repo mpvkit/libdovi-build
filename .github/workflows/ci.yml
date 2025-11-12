@@ -52,7 +52,7 @@ jobs:
           set_env('BUILD_VERSION', buildVersion)
           set_env('RELEASE_VERSION', releaseVersion)
 
-    - name: Build Rust
+    - name: Install nightly Rust
       run: |
         rustup toolchain install nightly --profile complete
         rustup default nightly

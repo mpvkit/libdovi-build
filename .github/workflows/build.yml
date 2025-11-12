@@ -53,18 +53,15 @@ jobs:
           set_env('BUILD_VERSION', buildVersion)
           set_env('RELEASE_VERSION', releaseVersion)
 
-    - name: Build Rust
+    - name: Install nightly Rust
       run: |
-        git clone https://github.com/rust-lang/rust.git -b 1.91.0
-        cd rust
-        ./x check
-        ./x build --stage 2
+        rustup toolchain install nightly --profile complete
+        rustup default nightly
 
-        rustup toolchain link stage0 build/host/stage0-sysroot
-        rustup toolchain link stage1 build/host/stage1
-        rustup toolchain link stage2 build/host/stage2
-        rustc +stage2 -vV
+        rustc -vV
         which rustc
+        rustc --print target-list|grep vision
+        rustc --print target-list|grep tvos
 
     - name: Install cargo-c
       run: |
@@ -72,10 +69,6 @@ jobs:
 
     - name: Build
       run: |
-        rustc +stage2 -vV
-        which rustc
-        rustc +stage2 --print target-list|grep vision
-        rustc +stage2 --print target-list|grep tvos
         make build version=${{ env.RELEASE_VERSION }}
 
     - name: Update Package.swift

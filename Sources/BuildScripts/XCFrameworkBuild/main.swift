@@ -72,7 +72,7 @@ private class BuildDovi: BaseBuild {
         let environ = environment(platform: platform, arch: arch)
 
         let cargo = Utility.shell("which cargo", isOutput: true, environment: environ)!
-        try Utility.launch(path: cargo, arguments: ["+stage2", "cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
+        try Utility.launch(path: cargo, arguments: ["cinstall", "-Zbuild-std=std,panic_abort", "--release", "--prefix=\(prefix.path)", "--target=\(target)"] , currentDirectoryURL: currentDirectoryURL, environment: environ)
     }
 }
 

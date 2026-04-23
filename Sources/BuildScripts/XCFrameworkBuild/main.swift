@@ -51,7 +51,14 @@ enum Library: String, CaseIterable, BuildLibrary {
             with: "",
             options: .regularExpression
         )
-        return normalized.isEmpty ? "0.0.0" : normalized
+        let parts = normalized.split(separator: ".").map { Int($0) ?? 0 }
+        if parts.isEmpty {
+            return "0.0.0"
+        }
+        let major = parts[0]
+        let minor = parts.count > 1 ? parts[1] : 0
+        let patch = parts.count > 2 ? parts[2] : 0
+        return "\(major).\(minor).\(patch)"
     }
 }
 

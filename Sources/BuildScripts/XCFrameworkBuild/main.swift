@@ -15,7 +15,7 @@ enum Library: String, CaseIterable, BuildLibrary {
     var version: String {
         switch self {
         case .libdovi:
-            return "libdovi-3.3.2"
+            return "2.3.2"
         }
     }
 

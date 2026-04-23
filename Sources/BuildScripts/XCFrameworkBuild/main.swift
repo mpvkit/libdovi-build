@@ -1,17 +1,16 @@
 import Foundation
+import BuildShared
 
 do {
-    let options = try ArgumentOptions.parse(CommandLine.arguments)
-    try Build.performCommand(options)
-
-    try BuildDovi().buildALL()
+    let options = try BuildRunner.performCommand()
+    try BuildDovi(options: options).buildALL()
 } catch {
     print(error.localizedDescription)
     exit(1)
 }
 
 
-enum Library: String, CaseIterable {
+enum Library: String, CaseIterable, BuildLibrary {
     case libdovi
     var version: String {
         switch self {
@@ -29,22 +28,43 @@ enum Library: String, CaseIterable {
 
     // for generate Package.swift
     var targets : [PackageTarget] {
+        let releaseVersion = resolvedReleaseVersion
         switch self {
         case .libdovi:
             return  [
                 .target(
                     name: "Libdovi",
-                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(BaseBuild.options.releaseVersion)/Libdovi.xcframework.zip",
-                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(BaseBuild.options.releaseVersion)/Libdovi.xcframework.checksum.txt"
+                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(releaseVersion)/Libdovi.xcframework.zip",
+                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(releaseVersion)/Libdovi.xcframework.checksum.txt"
                 ),
             ]
         }
     }
+
+    private var resolvedReleaseVersion: String {
+        if let releaseVersion = BuildRunner.options?.releaseVersion, !releaseVersion.isEmpty {
+            return releaseVersion
+        }
+
+        let normalized = version.replacingOccurrences(
+            of: #"[^.0-9]+|-.+"#,
+            with: "",
+            options: .regularExpression
+        )
+        let parts = normalized.split(separator: ".").map { Int($0) ?? 0 }
+        if parts.isEmpty {
+            return "0.0.0"
+        }
+        let major = parts[0]
+        let minor = parts.count > 1 ? parts[1] : 0
+        let patch = parts.count > 2 ? parts[2] : 0
+        return "\(major).\(minor).\(patch)"
+    }
 }
 
 private class BuildDovi: BaseBuild {
-    init() {
-        super.init(library: .libdovi)
+    init(options: ArgumentOptions) {
+        super.init(library: Library.libdovi, options: options)
     }
 
     override func environment(platform: PlatformType, arch: ArchType) -> [String: String] {

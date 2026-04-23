@@ -6,7 +6,10 @@ let package = Package(
     name: "libdovi",
     platforms: [.macOS(.v11), .iOS(.v14), .tvOS(.v14)],
     products: [
-        .library(name: "Libdovi", targets: ["_Libdovi"]),
+        .library(
+            name: "Libdovi",
+            targets: ["_Libdovi"]
+        ),
     ],
     targets: [
         // Need a dummy target to embedded correctly.

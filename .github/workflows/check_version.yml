@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: mpvkit/BuildShared/.github/workflows/check_version.yml@main
+    uses: mpvkit/BuildShared/.github/workflows/check_version.yml@a8f5d9977128f0ec66d3f8d6ec5dbd42598aa67c
     secrets: inherit
     with:
       repository: 'quietvoid/dovi_tool'

@@ -33,8 +33,8 @@ enum Library: String, CaseIterable, BuildLibrary {
             return  [
                 .target(
                     name: "Libdovi",
-                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options!.releaseVersion)/Libdovi.xcframework.zip",
-                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options!.releaseVersion)/Libdovi.xcframework.checksum.txt"
+                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options?.releaseVersion ?? "0.0.0")/Libdovi.xcframework.zip",
+                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options?.releaseVersion ?? "0.0.0")/Libdovi.xcframework.checksum.txt"
                 ),
             ]
         }

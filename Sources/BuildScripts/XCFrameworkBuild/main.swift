@@ -1,17 +1,16 @@
 import Foundation
+import BuildShared
 
 do {
-    let options = try ArgumentOptions.parse(CommandLine.arguments)
-    try Build.performCommand(options)
-
-    try BuildDovi().buildALL()
+    let options = try BuildRunner.performCommand()
+    try BuildDovi(options: options).buildALL()
 } catch {
     print(error.localizedDescription)
     exit(1)
 }
 
 
-enum Library: String, CaseIterable {
+enum Library: String, CaseIterable, BuildLibrary {
     case libdovi
     var version: String {
         switch self {
@@ -34,8 +33,8 @@ enum Library: String, CaseIterable {
             return  [
                 .target(
                     name: "Libdovi",
-                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(BaseBuild.options.releaseVersion)/Libdovi.xcframework.zip",
-                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(BaseBuild.options.releaseVersion)/Libdovi.xcframework.checksum.txt"
+                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options!.releaseVersion)/Libdovi.xcframework.zip",
+                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options!.releaseVersion)/Libdovi.xcframework.checksum.txt"
                 ),
             ]
         }
@@ -43,8 +42,8 @@ enum Library: String, CaseIterable {
 }
 
 private class BuildDovi: BaseBuild {
-    init() {
-        super.init(library: .libdovi)
+    init(options: ArgumentOptions) {
+        super.init(library: Library.libdovi, options: options)
     }
 
     override func environment(platform: PlatformType, arch: ArchType) -> [String: String] {

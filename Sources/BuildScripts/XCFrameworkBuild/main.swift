@@ -28,16 +28,30 @@ enum Library: String, CaseIterable, BuildLibrary {
 
     // for generate Package.swift
     var targets : [PackageTarget] {
+        let releaseVersion = resolvedReleaseVersion
         switch self {
         case .libdovi:
             return  [
                 .target(
                     name: "Libdovi",
-                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options?.releaseVersion ?? "0.0.0")/Libdovi.xcframework.zip",
-                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(BuildRunner.options?.releaseVersion ?? "0.0.0")/Libdovi.xcframework.checksum.txt"
+                    url: "https://github.com/mpvkit/libdovi-build/releases/download/\(releaseVersion)/Libdovi.xcframework.zip",
+                    checksum: "https://github.com/mpvkit/libdovi-build/releases/download/\(releaseVersion)/Libdovi.xcframework.checksum.txt"
                 ),
             ]
         }
+    }
+
+    private var resolvedReleaseVersion: String {
+        if let releaseVersion = BuildRunner.options?.releaseVersion, !releaseVersion.isEmpty {
+            return releaseVersion
+        }
+
+        let normalized = version.replacingOccurrences(
+            of: #"[^.0-9]+|-.+"#,
+            with: "",
+            options: .regularExpression
+        )
+        return normalized.isEmpty ? "0.0.0" : normalized
     }
 }
 
